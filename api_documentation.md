@@ -61,9 +61,10 @@
     "msg": "success",
     "data": {
         "id": 1,
-        "openId": "wx_open_id",
         "name": "用户昵称",
         "avatarUrl": "头像URL",
+        "gender": 1,
+        "phone": "13726800569",
         "createTime": "2024-01-01 12:00:00"
     }
 }
@@ -77,7 +78,7 @@
 ```json
 {
     "id": 1,
-    "nickName": "新昵称",
+    "name": "新昵称",
     "avatarUrl": "新头像URL",
     "gender": 2
 }

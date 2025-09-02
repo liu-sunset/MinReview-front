@@ -17,6 +17,20 @@ export const userApi = {
   // 注册账号
   register: (data: { name: string; password: string }) => {
     return api.post('/user/register', data);
+  },
+  // 注销账号
+  deleteAccount: (id: number) => {
+    return api.delete(`/user/personInfo?id=${id}`);
+  },
+  // 上传图片
+  uploadImage: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/admin/file/upload/image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
   }
 };
 
@@ -82,10 +96,7 @@ export const likeApi = {
   cancelDislike: (dishId: number, userId: number) => {
     return api.delete(`/user/dislike/${dishId}/${userId}`);
   },
-  // 获取用户对菜品的评价状态
-  getUserDishRating: (dishId: number, userId: number) => {
-    return api.get(`/user/rating/${dishId}/${userId}`);
-  }
+
 };
 
 // 评论相关接口

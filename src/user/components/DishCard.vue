@@ -77,35 +77,43 @@ const userStore = useUserStore();
 
 const isLiked = ref(props.dish.isLiked || false);
 const isDisliked = ref(props.dish.isDisliked || false);
-const lastRatingTime = ref<Date | null>(null);
 
-// 获取用户对当前菜品的评价状态
-const fetchUserRating = async () => {
-  if (!userStore.isLoggedIn) return;
-  
-  try {
-    const res = await likeApi.getUserDishRating(props.dish.id, userStore.userId);
-    if (res.code === 1 && res.data) {
-      isLiked.value = res.data.isLiked || false;
-      isDisliked.value = res.data.isDisliked || false;
-      lastRatingTime.value = res.data.lastRatingTime ? new Date(res.data.lastRatingTime) : null;
-    }
-  } catch (error) {
-    console.error('获取用户评价状态失败:', error);
-  }
-};
-
-// 检查是否在24小时内已评价
+// 检查用户是否在24小时内对该菜品进行过评价
 const isRatedWithin24Hours = computed(() => {
-  if (!lastRatingTime.value) return false;
+  if (!userStore.isLoggedIn) return false;
   
-  const now = new Date();
-  const hoursDiff = (now.getTime() - lastRatingTime.value.getTime()) / (1000 * 60 * 60);
+  const ratingKey = `dish_rating_${props.dish.id}_${userStore.userId}`;
+  const lastRatingTime = localStorage.getItem(ratingKey);
+  
+  if (!lastRatingTime) return false;
+  
+  const lastTime = new Date(lastRatingTime).getTime();
+  const currentTime = new Date().getTime();
+  const hoursDiff = (currentTime - lastTime) / (1000 * 60 * 60);
+  
   return hoursDiff < 24;
 });
 
+// 记录用户评价时间
+const recordRatingTime = () => {
+  if (!userStore.isLoggedIn) return;
+  
+  const ratingKey = `dish_rating_${props.dish.id}_${userStore.userId}`;
+  localStorage.setItem(ratingKey, new Date().toISOString());
+};
+
 onMounted(() => {
-  fetchUserRating();
+  // 检查本地存储中的评价状态
+  if (userStore.isLoggedIn) {
+    const likeStatusKey = `dish_like_${props.dish.id}_${userStore.userId}`;
+    const dislikeStatusKey = `dish_dislike_${props.dish.id}_${userStore.userId}`;
+    
+    const storedLikeStatus = localStorage.getItem(likeStatusKey);
+    const storedDislikeStatus = localStorage.getItem(dislikeStatusKey);
+    
+    if (storedLikeStatus === 'true') isLiked.value = true;
+    if (storedDislikeStatus === 'true') isDisliked.value = true;
+  }
 });
 
 const handleLike = async () => {
@@ -116,7 +124,7 @@ const handleLike = async () => {
   }
   
   // 检查是否在24小时内已评价过且当前不是取消操作
-  if (isRatedWithin24Hours.value && !isLiked.value) {
+  if (isRatedWithin24Hours.value && !isLiked.value && isDisliked.value) {
     ElMessage.warning('24小时内只能对同一菜品评价一次');
     return;
   }
@@ -127,18 +135,29 @@ const handleLike = async () => {
       await likeApi.cancelLike(props.dish.id, userStore.userId);
       isLiked.value = false;
       props.dish.likeCount--;
-      lastRatingTime.value = null;
+      
+      // 更新本地存储
+      localStorage.removeItem(`dish_like_${props.dish.id}_${userStore.userId}`);
     } else {
       // 点赞
       await likeApi.likeDish({ dishId: props.dish.id, userId: userStore.userId });
       isLiked.value = true;
       props.dish.likeCount++;
-      lastRatingTime.value = new Date();
+      
+      // 记录评价时间
+      recordRatingTime();
+      
+      // 更新本地存储
+      localStorage.setItem(`dish_like_${props.dish.id}_${userStore.userId}`, 'true');
       
       // 如果之前点踩了，取消点踩
       if (isDisliked.value) {
+        await likeApi.cancelDislike(props.dish.id, userStore.userId);
         isDisliked.value = false;
         props.dish.dislikeCount--;
+        
+        // 更新本地存储
+        localStorage.removeItem(`dish_dislike_${props.dish.id}_${userStore.userId}`);
       }
     }
   } catch (error) {
@@ -154,7 +173,7 @@ const handleDislike = async () => {
   }
   
   // 检查是否在24小时内已评价过且当前不是取消操作
-  if (isRatedWithin24Hours.value && !isDisliked.value) {
+  if (isRatedWithin24Hours.value && !isDisliked.value && isLiked.value) {
     ElMessage.warning('24小时内只能对同一菜品评价一次');
     return;
   }
@@ -165,18 +184,29 @@ const handleDislike = async () => {
       await likeApi.cancelDislike(props.dish.id, userStore.userId);
       isDisliked.value = false;
       props.dish.dislikeCount--;
-      lastRatingTime.value = null;
+      
+      // 更新本地存储
+      localStorage.removeItem(`dish_dislike_${props.dish.id}_${userStore.userId}`);
     } else {
       // 点踩
       await likeApi.dislikeDish({ dishId: props.dish.id, userId: userStore.userId });
       isDisliked.value = true;
       props.dish.dislikeCount++;
-      lastRatingTime.value = new Date();
+      
+      // 记录评价时间
+      recordRatingTime();
+      
+      // 更新本地存储
+      localStorage.setItem(`dish_dislike_${props.dish.id}_${userStore.userId}`, 'true');
       
       // 如果之前点赞了，取消点赞
       if (isLiked.value) {
+        await likeApi.cancelLike(props.dish.id, userStore.userId);
         isLiked.value = false;
         props.dish.likeCount--;
+        
+        // 更新本地存储
+        localStorage.removeItem(`dish_like_${props.dish.id}_${userStore.userId}`);
       }
     }
   } catch (error) {

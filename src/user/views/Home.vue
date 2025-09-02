@@ -14,12 +14,12 @@
       <div class="user-actions">
         <template v-if="userStore.isLoggedIn">
           <el-dropdown trigger="click" @command="handleCommand">
-            <span class="user-info">
-              {{ userStore.userInfo.name }}
-              <el-icon><ArrowDown /></el-icon>
-            </span>
+            <div class="avatar-container" @click.stop="goToProfile">
+              <el-avatar :size="40" :src="userStore.userInfo.avatarUrl || defaultAvatar" />
+            </div>
             <template #dropdown>
               <el-dropdown-menu>
+                <el-dropdown-item command="profile">个人中心</el-dropdown-item>
                 <el-dropdown-item command="logout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -145,6 +145,7 @@ interface Dish {
 const router = useRouter();
 const dishStore = useDishStore();
 const userStore = useUserStore();
+const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png';
 
 // 筛选条件
 const searchQuery = ref('');
@@ -285,12 +286,19 @@ const handleSizeChange = (size: number) => {
   currentPage.value = 1;
 };
 
+// 跳转到个人中心页面
+const goToProfile = () => {
+  router.push('/profile');
+};
+
 // 处理用户下拉菜单命令
 const handleCommand = (command: string) => {
   if (command === 'logout') {
     userStore.logout();
     ElMessage.success('已退出登录');
     router.push('/login');
+  } else if (command === 'profile') {
+    goToProfile();
   }
 };
 </script>
@@ -330,15 +338,14 @@ const handleCommand = (command: string) => {
       align-items: center;
       gap: 15px;
 
-      .user-info {
-        display: flex;
-        align-items: center;
+      .avatar-container {
         cursor: pointer;
-        color: #333;
-        font-size: 14px;
-
-        .el-icon {
-          margin-left: 5px;
+        border-radius: 50%;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+        
+        &:hover {
+          transform: scale(1.05);
         }
       }
 
