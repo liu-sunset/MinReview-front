@@ -10,10 +10,14 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
+    "@types/uuid": "^10.0.0",
     "axios": "^1.11.0",
+    "bad-words": "^4.0.0",
     "element-plus": "^2.11.1",
+    "marked": "^16.2.1",
     "pinia": "^3.0.3",
     "sass": "^1.91.0",
+    "uuid": "^11.1.0",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1"
   },

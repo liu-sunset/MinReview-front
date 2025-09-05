@@ -12,7 +12,7 @@
         />
       </div>
       <div class="user-actions">
-        <template v-if="userStore.isLoggedIn">
+          <template v-if="userStore.isLoggedIn">
           <el-dropdown trigger="click" @command="handleCommand">
             <div class="avatar-container" @click.stop="goToProfile">
               <el-avatar :size="40" :src="userStore.userInfo.avatarUrl || defaultAvatar" />
@@ -114,6 +114,13 @@
         />
       </div>
     </main>
+    <!-- AI聊天组件 -->
+    <ai-chat v-if="showAiChat" @close="showAiChat = false" />
+    
+    <!-- AI聊天按钮 -->
+    <div class="ai-chat-button" @click="handleAiChatClick">
+      <el-icon><ChatDotRound /></el-icon>
+    </div>
   </div>
 </template>
 
@@ -121,13 +128,14 @@
 import { ref, reactive, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { Search, ArrowDown } from '@element-plus/icons-vue';
+import { Search, ArrowDown, ChatDotRound } from '@element-plus/icons-vue';
 import { useDishStore } from '../store/dish';
 import { useUserStore } from '../store/user';
 import { dishApi } from '../api/services';
 import DishCard from '../components/DishCard.vue';
 import LoadingState from '../components/LoadingState.vue';
 import EmptyState from '../components/EmptyState.vue';
+import AiChat from '../components/AiChat.vue';
 
 interface Dish {
   id: number;
@@ -161,6 +169,7 @@ const total = ref(0);
 // 数据
 const dishList = ref<Dish[]>([]);
 const loading = ref(false);
+const showAiChat = ref(false);
 
 // 初始化数据
 onMounted(async () => {
@@ -174,6 +183,16 @@ onMounted(async () => {
 watch([selectedCampus, selectedCanteen, selectedFloor, currentPage, pageSize], () => {
   fetchDishList();
 });
+
+// 处理AI聊天按钮点击
+const handleAiChatClick = () => {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录后再使用AI助手');
+    router.push('/login');
+    return;
+  }
+  showAiChat.value = true;
+};
 
 // 获取菜品列表
 const fetchDishList = async () => {
@@ -309,111 +328,220 @@ const handleCommand = (command: string) => {
   display: flex;
   flex-direction: column;
   background-color: #f5f5f5;
+  animation: fadeIn 0.5s ease-out;
+
+.ai-chat-button {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background-color: #333333;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  z-index: 999;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    background-color: #555555;
+  }
+  
+  .el-icon {
+    font-size: 28px;
+  }
+}
 
   .header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
-    background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 18px 24px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     position: sticky;
     top: 0;
     z-index: 10;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
 
     .logo {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: bold;
-      color: #333;
-      margin-right: 30px;
+      color: #333333;
+      margin-right: 36px;
+      letter-spacing: 0.5px;
     }
 
     .search-box {
       flex: 1;
       max-width: 500px;
-      margin-right: 20px;
+      margin-right: 24px;
+      
+      :deep(.el-input__wrapper) {
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        
+        &:focus-within {
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          transform: translateY(-2px);
+        }
+      }
     }
 
     .user-actions {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 18px;
 
       .avatar-container {
         cursor: pointer;
         border-radius: 50%;
         overflow: hidden;
-        transition: transform 0.3s ease;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         
         &:hover {
-          transform: scale(1.05);
+          transform: scale(1.08);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
       }
 
       .login-link,
       .register-link {
-        color: #333;
+        color: #333333;
         text-decoration: none;
-        font-size: 14px;
-        padding: 5px 10px;
-        border-radius: 4px;
-        transition: background-color 0.3s;
+        font-size: 15px;
+        padding: 8px 16px;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        font-weight: 500;
 
         &:hover {
           background-color: #f0f0f0;
+          transform: translateY(-2px);
         }
       }
 
       .register-link {
-        color: #409eff;
+        color: #333333;
+        background-color: #e0e0e0;
+        
+        &:hover {
+          background-color: #d0d0d0;
+        }
       }
     }
   }
 
   .main-content {
     flex: 1;
-    padding: 20px;
+    padding: 24px;
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
 
     .filters {
       display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
+      gap: 16px;
+      margin-bottom: 24px;
       flex-wrap: wrap;
+      animation: fadeIn 0.5s ease-out 0.2s both;
 
       .filter-item {
         width: 200px;
+        
+        :deep(.el-input__wrapper) {
+          border-radius: 12px;
+          transition: all 0.3s ease;
+          
+          &:focus-within {
+            box-shadow: 0 0 0 1px #333333 inset;
+          }
+        }
       }
     }
 
     .dish-list-container {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      animation: fadeIn 0.5s ease-out 0.3s both;
     }
 
     .dish-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 24px;
       
       @media (min-width: 768px) {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       }
       
       @media (min-width: 992px) {
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(4, 1fr);
       }
 
       .dish-item {
         height: 100%;
+        transition: transform 0.3s ease;
+        
+        &:hover {
+          transform: translateY(-4px);
+        }
       }
     }
 
     .pagination-container {
       display: flex;
       justify-content: center;
-      margin-top: 30px;
+      margin-top: 36px;
+      animation: fadeIn 0.5s ease-out 0.4s both;
+      
+      :deep(.el-pagination) {
+        --el-pagination-button-bg-color: #ffffff;
+        --el-pagination-hover-color: #333333;
+        
+        .el-pagination__sizes .el-select .el-input .el-input__wrapper {
+          border-radius: 12px;
+        }
+        
+        button {
+          border-radius: 12px;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            transform: translateY(-2px);
+            background-color: #f0f0f0;
+          }
+        }
+        
+        .el-pager li {
+          border-radius: 12px;
+          transition: all 0.3s ease;
+          
+          &.is-active {
+            background-color: #333333;
+            color: #ffffff;
+          }
+          
+          &:hover:not(.is-active) {
+            transform: translateY(-2px);
+            background-color: #f0f0f0;
+          }
+        }
+      }
     }
   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

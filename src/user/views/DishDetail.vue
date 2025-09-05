@@ -1,7 +1,7 @@
 <template>
   <div class="dish-detail-container">
     <div class="back-button">
-      <el-button @click="goBack" icon="ArrowLeft">返回</el-button>
+      <el-button @click="goBack" icon="ArrowLeft" class="custom-back-button">返回</el-button>
     </div>
     
     <div v-if="loading" class="loading-container">
@@ -397,6 +397,8 @@ const handleDislike = async () => {
   }
 };
 
+import { ContentFilter } from '../utils/contentFilter';
+
 const submitComment = async () => {
   // 检查用户是否登录
   if (!userStore.isLoggedIn) {
@@ -414,13 +416,20 @@ const submitComment = async () => {
       return;
     }
     
+    // 检测评论内容是否包含违规词汇
+    const content = commentForm.content.trim();
+    if (ContentFilter.containsProfanity(content)) {
+      ElMessage.error('评论内容包含违规词汇，请修改后再提交');
+      return;
+    }
+    
     submitting.value = true;
     try {
       // 构建评论数据，确保与API文档一致
       const commentData = {
         dishId: dishId.value,
         userId: userStore.userId,
-        content: commentForm.content.trim(),
+        content: content,
         avatarUrl: userStore.avatarUrl,
         userName: userStore.userName
       };
@@ -507,9 +516,23 @@ const formatDate = (dateStr: string) => {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
+  animation: fadeIn 0.5s ease-in-out;
   
   .back-button {
     margin-bottom: 20px;
+    
+    .custom-back-button {
+      border-radius: 20px;
+      background-color: var(--el-color-primary, #333);
+      color: white;
+      border: none;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background-color: var(--el-color-primary-light-3, #555);
+        transform: translateX(-3px);
+      }
+    }
   }
   
   .loading-container,
@@ -524,10 +547,10 @@ const formatDate = (dateStr: string) => {
     display: flex;
     gap: 30px;
     margin-bottom: 40px;
-    background-color: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    background-color: var(--el-bg-color, #fff);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     
     @media (max-width: 768px) {
       flex-direction: column;
@@ -536,9 +559,16 @@ const formatDate = (dateStr: string) => {
     .dish-image {
       width: 300px;
       height: 300px;
-      border-radius: 12px;
+      border-radius: 16px;
       overflow: hidden;
       flex-shrink: 0;
+      background-color: var(--el-fill-color-lighter, #f5f5f5);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.02);
+      }
       
       @media (max-width: 768px) {
         width: 100%;
@@ -559,10 +589,10 @@ const formatDate = (dateStr: string) => {
       flex-direction: column;
       
       .dish-name {
-        font-size: 24px;
+        font-size: 26px;
         font-weight: 600;
-        margin-bottom: 16px;
-        color: #333;
+        margin-bottom: 18px;
+        color: var(--el-text-color-primary, #303133);
       }
       
       .dish-meta {
@@ -573,19 +603,25 @@ const formatDate = (dateStr: string) => {
         .meta-item {
           display: flex;
           align-items: center;
-          color: #666;
+          color: var(--el-text-color-secondary, #606266);
+          background-color: var(--el-fill-color-lighter, #f5f5f5);
+          padding: 6px 12px;
+          border-radius: 20px;
           
           .el-icon {
-            margin-right: 6px;
+            margin-right: 8px;
           }
         }
       }
       
       .dish-description {
         margin-bottom: 30px;
-        color: #666;
-        line-height: 1.6;
+        color: var(--el-text-color-secondary, #606266);
+        line-height: 1.8;
         flex: 1;
+        background-color: var(--el-fill-color-lighter, #f5f5f5);
+        padding: 16px;
+        border-radius: 12px;
       }
       
       .dish-actions {
@@ -594,9 +630,18 @@ const formatDate = (dateStr: string) => {
         
         .action-item {
           .el-button {
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--el-border-color-light, #e4e7ed);
+            
+            &:hover {
+              transform: translateY(-2px);
+            }
+            
             &.active {
-              color: #409eff;
-              background-color: #ecf5ff;
+              color: var(--el-color-primary, #409eff);
+              background-color: var(--el-color-primary-light-9, #ecf5ff);
+              border-color: var(--el-color-primary-light-5, #a0cfff);
             }
           }
         }
@@ -605,20 +650,48 @@ const formatDate = (dateStr: string) => {
   }
   
   .comments-section {
-    background-color: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    background-color: var(--el-bg-color, #fff);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     
     .section-title {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 600;
-      margin-bottom: 20px;
-      color: #333;
+      margin-bottom: 24px;
+      color: var(--el-text-color-primary, #303133);
+      position: relative;
+      padding-left: 12px;
+      
+      &:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 20px;
+        background-color: var(--el-color-primary, #409eff);
+        border-radius: 2px;
+      }
     }
     
     .comment-form {
       margin-bottom: 30px;
+      
+      .el-textarea__inner {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        
+        &:focus {
+          box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+        }
+      }
+      
+      .el-button {
+        border-radius: 20px;
+        padding: 10px 24px;
+      }
     }
     
     .login-prompt {
@@ -627,20 +700,31 @@ const formatDate = (dateStr: string) => {
       align-items: center;
       gap: 15px;
       margin-bottom: 30px;
-      padding: 20px;
-      background-color: #f9f9f9;
-      border-radius: 8px;
+      padding: 24px;
+      background-color: var(--el-fill-color-lighter, #f5f5f5);
+      border-radius: 16px;
       
       p {
-        color: #666;
+        color: var(--el-text-color-secondary, #606266);
+        font-size: 16px;
+      }
+      
+      .el-button {
+        border-radius: 20px;
+        padding: 10px 24px;
       }
     }
     
     .comments-list {
       .comment-items {
         .comment-item {
-          padding: 20px 0;
-          border-bottom: 1px solid #eee;
+          padding: 24px 0;
+          border-bottom: 1px solid var(--el-border-color-lighter, #ebeef5);
+          transition: background-color 0.3s ease;
+          
+          &:hover {
+            background-color: var(--el-fill-color-light, #f5f7fa);
+          }
           
           &:last-child {
             border-bottom: none;
@@ -656,6 +740,11 @@ const formatDate = (dateStr: string) => {
               align-items: center;
               gap: 12px;
               
+              .el-avatar {
+                border: 2px solid var(--el-border-color-lighter, #ebeef5);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+              }
+              
               .user-details {
                 display: flex;
                 flex-direction: column;
@@ -663,42 +752,72 @@ const formatDate = (dateStr: string) => {
                 
                 .username {
                   font-weight: 500;
-                  color: #333;
+                  color: var(--el-text-color-primary, #303133);
                   font-size: 16px;
                 }
-                
-
               }
             }
             
             .comment-time {
-              color: #999;
+              color: var(--el-text-color-secondary, #909399);
               font-size: 12px;
+              background-color: var(--el-fill-color-lighter, #f5f5f5);
+              padding: 4px 8px;
+              border-radius: 12px;
             }
           }
           
           .comment-content {
-            color: #333;
-            line-height: 1.6;
+            color: var(--el-text-color-regular, #606266);
+            line-height: 1.8;
             word-break: break-word;
-            padding: 5px 0 10px 0;
+            padding: 8px 0 12px 0;
             font-size: 15px;
+            background-color: var(--el-fill-color-lighter, #f5f5f5);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 8px 0;
           }
           
           .comment-actions {
             display: flex;
             justify-content: flex-end;
             margin-top: 10px;
+            
+            .el-button {
+              border-radius: 16px;
+              transition: all 0.3s ease;
+              
+              &:hover {
+                transform: translateY(-2px);
+              }
+            }
           }
         }
       }
       
       .pagination-container {
-        margin-top: 20px;
+        margin-top: 30px;
         display: flex;
         justify-content: center;
+        
+        .el-pagination {
+          .el-pagination__sizes .el-input .el-input__inner,
+          button {
+            border-radius: 20px;
+          }
+          
+          .el-pager li {
+            border-radius: 50%;
+          }
+        }
       }
     }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }
 </style>

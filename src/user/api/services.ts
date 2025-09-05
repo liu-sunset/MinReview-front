@@ -22,6 +22,10 @@ export const userApi = {
   deleteAccount: (id: number) => {
     return api.delete(`/user/personInfo?id=${id}`);
   },
+  // 退出登录
+  logout: () => {
+    return api.post('/user/logout');
+  },
   // 上传图片
   uploadImage: (file: File) => {
     const formData = new FormData();
@@ -96,7 +100,16 @@ export const likeApi = {
   cancelDislike: (dishId: number, userId: number) => {
     return api.delete(`/user/dislike/${dishId}/${userId}`);
   },
+};
 
+// AI聊天相关接口
+export const aiApi = {
+  // 发送消息到AI聊天
+  sendMessage: (data: { memoryId: string; message: string }) => {
+    return api.post('/user/ai', data, {
+      responseType: 'stream'
+    });
+  }
 };
 
 // 评论相关接口

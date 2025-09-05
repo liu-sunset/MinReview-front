@@ -50,11 +50,19 @@ export const useUserStore = defineStore('user', {
       }
     },
     // 登出
-    logout() {
-      this.token = '';
-      this.userInfo = {};
-      localStorage.removeItem('token');
-      localStorage.removeItem('userInfo');
+    async logout() {
+      try {
+        // 调用后端登出接口
+        await userApi.logout();
+      } catch (error) {
+        console.error('登出请求错误:', error);
+      } finally {
+        // 无论接口是否成功，都清除本地存储
+        this.token = '';
+        this.userInfo = {};
+        localStorage.removeItem('token');
+        localStorage.removeItem('userInfo');
+      }
     }
   }
 });

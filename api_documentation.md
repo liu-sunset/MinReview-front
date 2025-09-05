@@ -79,6 +79,7 @@
 {
     "id": 1,
     "name": "新昵称",
+    "phone": "13726800569",
     "avatarUrl": "新头像URL",
     "gender": 2
 }
@@ -143,7 +144,46 @@
   }
   ```
 
+
+#### 1.1.6 修改账号密码 
+
+- **URL**: `/user/password/{userId}`
+
+- **Method**: `post`
+
+- **Headers**: `Authorization: Bearer <token>`
+
+- **Request Body**:
+
+  ```json
+  {
+      "oldPassword": "123456",
+      "newPassword": "234567"
+  }
+  ```
+
+
+#### 1.1.7 用户登出 
+
+- **URL**: `/user/logout`
+
+- **Method**: `post`
+
+- **Headers**: `Authorization: Bearer <token>`
+
+- **Response**:
+
+  ```json
+  {
+      "code": 1,
+      "msg": "success",
+      "data": null
+  }
+  ```
+
   
+
+
 
 ### 1.2 校区管理 
 
@@ -222,7 +262,7 @@
 - **Method**: `GET`
 - **Query Parameters**:
   - `page`: 页码（默认1）
-  - `pagepageSize`: 每页大小（默认10）
+  - `size`: 每页大小（默认10）
   - `keyword`: 搜索关键词（可选）
   - `canteenId`:食堂ID（选填）
   - `campusId`:校区ID（选填）
@@ -389,7 +429,7 @@
 - **Method**: `GET`
 - **Query Parameters**:
   - `page`: 页码（默认1）
-  - `pagepageSize`: 每页大小（默认10）
+  - `size`: 每页大小（默认10）
   - `dishId`：菜品ID
 - **Response**:
 ```json
@@ -460,7 +500,27 @@
   }
   ```
 
+
+### 1.8 AI聊天接口
+
+- **URL**: `/user/ai`
+
+- **Method**: `POST`
+
+- **Headers**: `Authorization: Bearer <token>`
+
+- **Request:**
+
+  ```json
+  {
+  	"memoryId": "3745698455",//当前时间戳
+  	"message": "用户问题"
+  }
+  ```
+
   
+
+- **Response:**后端采用了流式输出，produce是text/html，utf-8编码
 
 ## 2. 管理端接口
 
@@ -503,7 +563,7 @@
   
   - `page`: 页码（默认1）
   
-  - `pageSize`: 每页大小（默认10）
+  - `size`: 每页大小（默认10）
   
   - `keyword`: 搜索关键词（可选）
   
@@ -519,7 +579,6 @@
                 {
                     "id": 4,
                     "name": "赵六",
-                    "openId": "oXPrX5C56789012345678",
                     "avatarUrl": "https://example.com/avatar4.jpg",
                     "gender": 1,
                     "status": 1,
@@ -572,7 +631,7 @@
 - **Query Parameters**:
   
   - `page`: 页码（默认1）
-  - `pageSize`: 每页大小（默认10）
+  - `size`: 每页大小（默认10）
   - `keyword`: 搜索关键词（可选）
   - Response:
   
@@ -716,7 +775,7 @@
   
   - `page`: 页码（默认1）
   
-  - `pageSize`: 每页大小（默认10）
+  - `size`: 每页大小（默认10）
   
   - `keyword`: 搜索关键词（可选）
   
@@ -738,8 +797,6 @@
                             "campusId": 1,
                             "campusName": "主校区",
                             "address": "食堂地址",
-                            "openTime": "06:00",
-                            "closeTime": "22:00",
                             "status": 1,
                             "floorCount": 3  // 楼层数量
                         }
@@ -882,7 +939,7 @@
   
   - `page`: 页码（默认1）
   
-  - `pageSize`: 每页大小（默认10）
+  - `size`: 每页大小（默认10）
   
   - `keyWord:`楼层名称（可选）
   
@@ -971,7 +1028,7 @@
 - **Query Parameters**:
   - `page`: 页码（默认1）
   
-  - `pageSize`: 每页大小（默认10）
+  - `size`: 每页大小（默认10）
   
   - `keyword`: 搜索关键词（可选）
   
@@ -1147,7 +1204,7 @@
   
   - `page`: 页码（默认1）
   
-  - `pageSize`: 每页大小（默认10）
+  - `size`: 每页大小（默认10）
   
   - `dishId`: 菜品ID筛选（必选）
   
@@ -1284,7 +1341,7 @@
 - **Headers**: `Authorization: Bearer <token>`
 - **Query Parameters**:
   - `page`: 页码（默认1）
-  - `pageSize`: 每页大小（默认10）
+  - `size`: 每页大小（默认10）
   - `name`:名称
   
 

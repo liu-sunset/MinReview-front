@@ -83,46 +83,100 @@ const handleLogin = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: #f5f5f5;
+  animation: fadeIn 0.5s ease-in-out;
 
   .login-card {
     width: 100%;
     max-width: 400px;
-    padding: 30px;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    background-color: var(--el-bg-color, #fff);
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(0);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    }
 
     h2 {
       text-align: center;
       margin-bottom: 30px;
-      color: #333;
+      color: var(--el-text-color-primary, #303133);
+      font-size: 28px;
+      font-weight: 600;
+      position: relative;
+      
+      &:after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+        height: 3px;
+        background-color: var(--el-color-primary, #409eff);
+        border-radius: 3px;
+      }
+    }
+    
+    .el-form-item {
+      margin-bottom: 25px;
+      
+      .el-input__wrapper {
+        border-radius: 12px;
+        padding: 0 15px;
+        box-shadow: 0 0 0 1px var(--el-border-color, #dcdfe6);
+        transition: all 0.3s ease;
+        
+        &:hover, &.is-focus {
+          box-shadow: 0 0 0 1px var(--el-color-primary, #409eff);
+        }
+        
+        .el-input__inner {
+          height: 45px;
+        }
+      }
     }
 
     .login-btn {
       width: 100%;
       padding: 12px 0;
       font-size: 16px;
-      border-radius: 6px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+      }
     }
 
     .register-link {
-      margin-top: 20px;
+      margin-top: 25px;
       text-align: center;
       font-size: 14px;
-      color: #666;
+      color: var(--el-text-color-secondary, #606266);
 
       a {
-        color: #409eff;
+        color: var(--el-color-primary, #409eff);
         text-decoration: none;
         margin-left: 5px;
+        font-weight: 500;
+        transition: all 0.3s ease;
 
         &:hover {
-          text-decoration: underline;
+          color: var(--el-color-primary-light-3, #79bbff);
+          text-decoration: none;
         }
       }
     }
   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

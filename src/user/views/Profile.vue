@@ -36,6 +36,7 @@
         <div class="action-buttons">
           <el-button type="primary" @click="openEditDialog">编辑信息</el-button>
           <el-button type="danger" @click="confirmLogout">注销账号</el-button>
+          <el-button type="warning" @click="confirmSignOut">退出登录</el-button>
         </div>
       </div>
     </div>
@@ -316,6 +317,30 @@ const confirmLogout = () => {
   });
 };
 
+// 确认退出登录
+const confirmSignOut = () => {
+  ElMessageBox.confirm(
+    '确定要退出登录吗？',
+    '提示',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  ).then(async () => {
+    try {
+      await userStore.logout();
+      ElMessage.success('已退出登录');
+      router.push('/login');
+    } catch (error: any) {
+      console.error('退出登录错误:', error);
+      ElMessage.error('退出登录失败');
+    }
+  }).catch(() => {
+    // 用户取消操作
+  });
+};
+
 onMounted(() => {
   fetchUserInfo();
 });
@@ -325,19 +350,33 @@ onMounted(() => {
 .profile-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  background-color: var(--el-bg-color, #fff);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.5s ease-in-out;
   
   .profile-header {
     display: flex;
     align-items: center;
     margin-bottom: 30px;
     
+    .el-button {
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      padding: 10px 16px;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+    }
+    
     h2 {
       margin-left: 20px;
-      color: #333;
+      color: var(--el-text-color-primary, #303133);
+      font-size: 24px;
+      font-weight: 600;
     }
   }
   
@@ -356,9 +395,21 @@ onMounted(() => {
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 20px;
-        background-color: #f5f5f5;
-        border-radius: 12px;
+        padding: 25px;
+        background-color: var(--el-bg-color-page, #f5f5f5);
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        
+        &:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        }
+        
+        .el-avatar {
+          border: 3px solid var(--el-color-white, #fff);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
       }
     }
     
@@ -366,30 +417,59 @@ onMounted(() => {
       flex: 1;
       
       .info-section {
-        background-color: #f5f5f5;
-        padding: 20px;
-        border-radius: 12px;
-        margin-bottom: 20px;
+        background-color: var(--el-bg-color-page, #f5f5f5);
+        padding: 25px;
+        border-radius: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        
+        &:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        }
         
         h3 {
           margin-top: 0;
-          margin-bottom: 20px;
-          color: #333;
-          font-size: 18px;
+          margin-bottom: 25px;
+          color: var(--el-text-color-primary, #303133);
+          font-size: 20px;
+          font-weight: 600;
+          position: relative;
+          
+          &:after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background-color: var(--el-color-primary, #409eff);
+            border-radius: 3px;
+          }
         }
         
         .info-item {
-          margin-bottom: 15px;
+          margin-bottom: 18px;
           display: flex;
+          padding: 10px 15px;
+          border-radius: 12px;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            background-color: var(--el-bg-color, #fff);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          }
           
           .label {
             width: 100px;
-            color: #666;
+            color: var(--el-text-color-secondary, #606266);
             font-weight: 500;
           }
           
           .value {
-            color: #333;
+            color: var(--el-text-color-primary, #303133);
+            font-weight: 500;
           }
         }
       }
@@ -397,6 +477,25 @@ onMounted(() => {
       .action-buttons {
         display: flex;
         gap: 15px;
+        
+        .el-button {
+          border-radius: 12px;
+          padding: 12px 20px;
+          transition: all 0.3s ease;
+          
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          }
+          
+          &.el-button--danger:hover {
+            box-shadow: 0 4px 12px rgba(245, 108, 108, 0.2);
+          }
+          
+          &.el-button--primary:hover {
+            box-shadow: 0 4px 12px rgba(64, 158, 255, 0.2);
+          }
+        }
         
         @media (max-width: 768px) {
           flex-direction: column;
@@ -409,30 +508,55 @@ onMounted(() => {
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 15px;
+  
+  .el-button {
+    border-radius: 12px;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
 }
 
 .avatar-upload {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
   
   .clickable-avatar {
     cursor: pointer;
     transition: all 0.3s ease;
-    border: 2px solid transparent;
+    border: 3px solid transparent;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     
     &:hover {
       transform: scale(1.05);
-      border-color: #409EFF;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-color: var(--el-color-primary, #409EFF);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
   }
   
   .upload-tip {
-    font-size: 12px;
-    color: #909399;
+    font-size: 13px;
+    color: var(--el-text-color-secondary, #909399);
+    background-color: var(--el-bg-color-page, #f5f5f5);
+    padding: 8px 15px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background-color: var(--el-bg-color, #fff);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
